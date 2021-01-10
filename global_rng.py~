@@ -1,0 +1,5 @@
+import numpy as np
+rng=()
+def init:
+    rng = np.random.default_rng()
+    

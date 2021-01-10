@@ -1,0 +1,44 @@
+#!/usr/bin/env python3
+
+from neural_network import neural_network
+import numpy as np
+import scipy as sp
+
+from constants import *
+
+class rocket:
+    network: neural_network
+    position: np.array
+    velocity: np.array
+    angle: float
+    angular_velocity: float
+    def __init__(self, asteroid_count):
+        network_arg_count = asteroid_count*2 + 6
+        self.network = neural_network([network_arg_count, 10, 10, 3])
+        self.position = start_position.copy()
+        self.velocity = np.array([start_velocity, 0.0])
+        self.angle = 0.0
+        self.angular_velocity = 0.0
+    def from_parent(self, parent : rocket):
+        self.network.from_parent(parent.network)
+        self.position = start_position.copy()
+        self.velocity = np.array([start_velocity, 0.0])
+        self.angle = 0.0
+        self.angular_velocity = 0.0
+    def update(self, asteroids, deltaTime):
+        inp = np.array([])
+        for asteroid in asteroids:
+            rel_pos = asteroid.position - self.position
+            inp.append(rel_pos[0])
+            inp.append(rel_pos[1])
+        inp.append(target_position[0])
+        inp.append(target_position[1])
+        inp.append(self.position[0])
+        inp.append(self.position[1])
+        inp.append(self.velocity[0])
+        inp.append(self.velocity[1])
+        inp.append(self.angle)
+        inp.append(self.anglular_velocity)
+        out = self.network.calculate(inp)
+        self.velocity[0] += out[0] * deltaTime * 
+

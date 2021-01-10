@@ -1,0 +1,10 @@
+import numpy as np
+
+class obstacle:
+    position = []
+    radius: float
+
+    def __init__(self, position, radius):
+        self.position = position
+        print(self.position)
+        self.radius = radius

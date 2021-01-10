@@ -1,0 +1,78 @@
+from neural_network import neural_network
+import rocket
+import numpy as np
+import enum
+from constants import *
+import pygame
+
+
+class ASTEROID_STATUS(enum.Enum):
+    ALIVE = 0
+    DESTROYED = 1
+
+
+class asteroid(pygame.sprite.Sprite):
+    network: neural_network = None
+    position: np.array = None
+    velocity: np.array = None
+    status: ASTEROID_STATUS = ASTEROID_STATUS.ALIVE
+    network_inp_count: int
+    image: pygame.surface.Surface
+    radius: float
+    rect : pygame.rect.Rect
+
+    def __init__(self, asteroid_count: int, start_position: np.array, radius: float):
+        super().__init__()
+        self.network_inp_count = (asteroid_count-1)*2 + 6
+        self.network = neural_network([self.network_inp_count, 20, 20, 2])
+        self.position = start_position.flat.copy()
+        self.velocity = np.array([0.0, 0.0])
+        self.status = ASTEROID_STATUS.ALIVE
+        self.image = pygame.transform.smoothscale(pygame.image.load('obstacle.png').convert_alpha(),
+                                                  (2*int(radius), 2*int(radius)))
+        self.rect = self.image.get_rect()
+        self.radius = radius
+
+    def evolve_from(self, parent):
+        self.network = neural_network.from_parent(parent.network)
+
+    def die(self):
+        self.image = pygame.transform.smoothscale(pygame.image.load(
+            'obstacle.png').convert_alpha(), (2*radius, 2*radius))
+
+    def update(self, asteroids: pygame.sprite.Group, player: rocket.rocket, dt: float):
+        if self.status == ASTEROID_STATUS.ALIVE:
+            # TODO: get movement from neural network, check life status (collisions, out of bounds)
+            inp = []
+            for asteroid in asteroids:
+                if not asteroid.position[0] == self.position[0]:
+                    inp.append(asteroid.position[0] - self.position[0])
+                    inp.append(asteroid.position[1] - self.position[1])
+            inp.append(self.position[0])
+            inp.append(self.position[1])
+            inp.append(self.velocity[0])
+            inp.append(self.velocity[1])
+            inp.append(player.position[0] - self.position[0])
+            inp.append(player.position[0] - self.position[0])
+            out = self.network.calculate(np.array(inp))
+            self.velocity[0] += out[0] * asteroid_accel_coeff * dt
+            self.velocity[1] += out[1] * asteroid_accel_coeff * dt
+            self.position[0] += out[0] * asteroid_vel_coeff * dt
+            self.position[1] += out[1] * asteroid_vel_coeff * dt
+            self.rect.center = (int(self.position[0]), int(self.position[1]))
+            asteroids.remove(self)
+            for asteroid in asteroids:
+                dx = asteroid.position[0] - self.position[0]
+                dy = asteroid.position[1] - self.position[1]
+                if dx**2 + dy**2 <= 4*(asteroid.radius+self.radius)**2:
+                    self.die()
+                    asteroids.add(self)
+                    return
+            asteroids.add(self)
+            if self.position[0] < 0-self.radius or self.position[0] > window_width+self.radius or self.position[1] < 0-self.radius or self.position[1] > window_height+self.radius:
+                self.die()
+                return
+
+    def draw(self, surface: pygame.surface.Surface):
+        surface.blit(self.image, self.image.get_rect(
+            center=(int(self.position[0]), int(self.position[1]))))

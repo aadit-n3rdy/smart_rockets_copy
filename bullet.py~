@@ -1,0 +1,7 @@
+import numpy as np
+import pygame
+
+class bullet(pygame.sprite.Sprite):
+    position: np.array
+    velocity: np.array
+    image: pygame.surface.Surface

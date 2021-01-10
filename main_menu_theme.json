@@ -1,0 +1,15 @@
+{
+    "button":
+    {
+	"font":
+	{
+	    "name":"arcadeclassic",
+	    "size":"16",
+	    "regular_resource": {
+		"package": "data.fonts",
+		"resource":"ARCADECLASSIC.TTF"
+	    }
+	}
+    }
+
+}
