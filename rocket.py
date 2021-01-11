@@ -1,7 +1,12 @@
 import numpy as np
 import pygame
 import enum
-from constants import *
+from constants import window_width
+from constants import window_height
+from constants import generalise_height
+from constants import generalise_width
+from constants import rocket_accel_coeff
+from constants import rocket_velocity_coeff
 from math import atan2
 import bullet
 
@@ -18,8 +23,8 @@ class rocket(pygame.sprite.Sprite):
     status: ROCKET_STATUS
     image: pygame.surface.Surface
     rect: pygame.rect.Rect
-    unrotated_image : pygame.surface.Surface
-    last_shot_tick : float
+    unrotated_image: pygame.surface.Surface
+    last_shot_tick: float
 
     def __init__(self):
         super().__init__()
@@ -27,7 +32,8 @@ class rocket(pygame.sprite.Sprite):
         self.velocity = np.array([0.0, 0.0])
         self.angle = 0.0
         self.status = ROCKET_STATUS.ALIVE
-        self.unrotated_image = pygame.transform.smoothscale(pygame.image.load('rocket2.png').convert_alpha(), (generalise_height(20), generalise_height(20)))
+        self.unrotated_image = pygame.transform.smoothscale(pygame.image.load(
+            'rocket2.png').convert_alpha(), (generalise_height(20), generalise_height(20)))
         self.last_shot_tick = -1000
 
     def update(self, asteroids: pygame.sprite.Group, dt: float, bullets: list):
@@ -42,13 +48,13 @@ class rocket(pygame.sprite.Sprite):
             if pygame.mouse.get_pressed(num_buttons=3)[0]:
                 self.velocity[0] += rocket_accel_coeff * dt * angle_cos
                 self.velocity[1] += rocket_accel_coeff * dt * angle_sin
-            if pygame.mouse.get_pressed()[2] and (pygame.time.get_ticks() - self.last_shot_tick)/1000 >= 0.1:
+            if pygame.mouse.get_pressed()[2] and (pygame.time.get_ticks() - self.last_shot_tick)/1000 >= 0.2:
                 bullets.append(bullet.bullet(self.position.copy(), self.angle))
                 self.last_shot_tick = pygame.time.get_ticks()
             self.position[0] += rocket_velocity_coeff * dt * self.velocity[0]
             self.position[1] += rocket_velocity_coeff * dt * self.velocity[1]
-            self.image = pygame.transform.rotate(self.unrotated_image, np.degrees(self.angle)-90)
-            # TODO: get movement from neural network, check life status (collisions, out of bounds)
+            self.image = pygame.transform.rotate(
+                self.unrotated_image, np.degrees(self.angle)-90)
             self.rect = self.image.get_rect()
             self.rect.center = (self.position[0], self.position[1])
             for asteroid in asteroids:

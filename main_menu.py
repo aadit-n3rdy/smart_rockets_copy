@@ -5,10 +5,9 @@ import game_states
 
 background_color = (100, 100, 100)
 
-
 def main_menu(surface: pygame.surface.Surface):
     gui_manager = pygame_gui.UIManager(
-        (constants.window_width, constants.window_height))
+        (constants.window_width, constants.window_height), 'main_menu_theme.json')
     clock = pygame.time.Clock()
     font = pygame.font.Font("ARCADECLASSIC.TTF", 98, bold=True)
     title_img = font.render("Smart Asteroids", True,
@@ -35,10 +34,8 @@ def main_menu(surface: pygame.surface.Surface):
             if event.type == pygame.USEREVENT:
                 if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                     if event.ui_element == play_button:
-                        print("INFO: Playing game")
                         return game_states.GAME_STATES.IN_GAME
                     elif event.ui_element == quit_button:
-                        print("INFO: Quitting game")
                         return game_states.GAME_STATES.QUIT
             gui_manager.process_events(event)
 
